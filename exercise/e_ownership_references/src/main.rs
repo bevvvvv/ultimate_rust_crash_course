@@ -71,11 +71,7 @@ fn change(s: &mut String) {
 // Hint 1: use `.starts_with("b")` and `.contains("a")`
 // Hint 2: `&&` is the boolean "AND" operator
 fn eat(s: String) -> bool {
-    if s.starts_with("b") && s.contains("a") {
-        true
-    } else {
-        false
-    }
+    s.starts_with("b") && s.contains("a")
 }
 
 // Challenge: Write a function "bedazzle" that takes a mutable reference to a String and
