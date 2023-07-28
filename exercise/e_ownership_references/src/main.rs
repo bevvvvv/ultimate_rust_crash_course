@@ -61,7 +61,9 @@ fn inspect(s: &String) {
 // the String if it doesn't already end with "s". Then uncomment and run the code below with
 // `cargo run apple`.  Hint: use `.push_str("s")` on the mutable String reference to add an "s".
 fn change(s: &mut String) {
-    s.push_str("s");
+    if !s.ends_with("s") {
+        s.push_str("s");
+    }
 }
 
 // 3. Write a function `eat` that accepts ownership of (consumes) a String and returns a bool
