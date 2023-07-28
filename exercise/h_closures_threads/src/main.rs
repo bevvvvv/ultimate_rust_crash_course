@@ -107,6 +107,7 @@ fn main() {
     let handle_receiver_b = thread::spawn(move || {
         for value in receiver2 {
             println!("Child thread B: Received {}", value);
+            pause_ms(100);
         }
     });
 
