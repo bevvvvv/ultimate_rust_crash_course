@@ -102,7 +102,47 @@ fn main() {
                             .arg(Arg::with_name("height")
                                 .short("h")
                                 .help("Height of cropped image")
-                                .takes_value(true))).get_matches();
+                                .takes_value(true)))
+                        .subcommand(SubCommand::with_name("rotate")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("angle")
+                                .long("angle")
+                                .help("Rotation Angle in degrees interval of 90")
+                                .takes_value(true)))
+                        .subcommand(SubCommand::with_name("invert")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true)))
+                        .subcommand(SubCommand::with_name("grayscale")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true))).get_matches();
 
     match matches.subcommand() {
         ("blur", Some(blur_command)) => {
@@ -125,10 +165,26 @@ fn main() {
             let width = crop_command.value_of("width").unwrap().parse().expect("Failed to parse width");
             let height = crop_command.value_of("height").unwrap().parse().expect("Failed to parse height");
             crop(input, output, x, y, width, height);
+        },
+        ("rotate", Some(rotate_command)) => {
+            let input = rotate_command.value_of("input").unwrap().to_string();
+            let output = rotate_command.value_of("output").unwrap().to_string();
+            let angle = rotate_command.value_of("angle").unwrap().parse().expect("Failed to parse angle");
+            rotate(input, output, angle);
+        },
+        ("invert", Some(invert_command)) => {
+            let input = invert_command.value_of("input").unwrap().to_string();
+            let output = invert_command.value_of("output").unwrap().to_string();
+            invert(input, output);
+        },
+        ("grayscale", Some(grayscale_command)) => {
+            let input = grayscale_command.value_of("input").unwrap().to_string();
+            let output = grayscale_command.value_of("output").unwrap().to_string();
+            grayscale(input, output);
         }
         _ => {
             println!("Could not parse command.");
-        }
+        },
     }
 }
 
@@ -171,36 +227,51 @@ fn crop(infile: String, outfile: String, x: u32, y: u32, width: u32, height: u32
     img2.save(outfile).expect("Failed writing to output file.");
 }
 
-fn rotate(infile: String, outfile: String) {
+fn rotate(infile: String, outfile: String, angle: u32) {
     // See blur() for an example of how to open an image.
+    let img = image::open(infile).expect("Failed to open input file.");
 
     // There are 3 rotate functions to choose from (all clockwise):
     //   .rotate90()
     //   .rotate180()
     //   .rotate270()
     // All three methods return a new image.  Pick one and use it!
+    let mut img2 = img.clone();
+    match angle {
+        90 => img2 = img2.rotate90(),
+        180 => img2 = img2.rotate180(),
+        270 => img2 = img2.rotate270(),
+        _ => img2 = img2.rotate90(),
+    }
 
     // Challenge: parse the rotation amount from the command-line, pass it
     // through to this function to select which method to call.
 
     // See blur() for an example of how to save the image.
+    img2.save(outfile).expect("Failed writing to output file.");
 }
 
 fn invert(infile: String, outfile: String) {
     // See blur() for an example of how to open an image.
+    let mut img = image::open(infile).expect("Failed to open input file.");
 
     // .invert() takes no arguments and converts the image in-place, so you
     // will use the same image to save out to a different file.
+    img.invert();
 
     // See blur() for an example of how to save the image.
+    img.save(outfile).expect("Failed writing to output file.");
 }
 
 fn grayscale(infile: String, outfile: String) {
     // See blur() for an example of how to open an image.
+    let img = image::open(infile).expect("Failed to open input file.");
 
     // .grayscale() takes no arguments. It returns a new image.
+    let img2 = img.grayscale();
 
     // See blur() for an example of how to save the image.
+    img2.save(outfile).expect("Failed writing to output file.");
 }
 
 fn generate(outfile: String) {
