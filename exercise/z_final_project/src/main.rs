@@ -50,12 +50,20 @@ fn main() {
                                 .short("o")
                                 .help("Output file")
                                 .takes_value(true)
-                                .required(true))).get_matches();
+                                .required(true))
+                            .arg(Arg::with_name("blur_amount")
+                                .long("blur")
+                                .help("Blur amount")
+                                .takes_value(true)
+                                .required(true)
+                                .default_value("2.0"))).get_matches();
 
     if let Some(blur_command) = matches.subcommand_matches("blur") {
         // run blur
         // Improve the blur implementation -- see the blur() function below
-        blur(blur_command.value_of("input").unwrap().to_string(), blur_command.value_of("output").unwrap().to_string());
+        blur(blur_command.value_of("input").unwrap().to_string(),
+             blur_command.value_of("output").unwrap().to_string(),
+             blur_command.value_of("blur_amount").unwrap().parse().expect("Failed to parse a number"));
     }
     // provided code to start parsing -> using clap instead
     // let mut args: Vec<String> = std::env::args().skip(1).collect();
@@ -110,25 +118,26 @@ fn main() {
     // }
 }
 
-fn print_usage_and_exit() {
-    println!("USAGE (when in doubt, use a .png extension on your filenames)");
-    println!("blur INFILE OUTFILE");
-    println!("fractal OUTFILE");
-    // **OPTION**
-    // Print useful information about what subcommands and arguments you can use
-    // println!("...");
-    std::process::exit(-1);
-}
+// part of example parsing code (not using clap)
+// fn print_usage_and_exit() {
+//     println!("USAGE (when in doubt, use a .png extension on your filenames)");
+//     println!("blur INFILE OUTFILE");
+//     println!("fractal OUTFILE");
+//     // **OPTION**
+//     // Print useful information about what subcommands and arguments you can use
+//     // println!("...");
+//     std::process::exit(-1);
+// }
 
-fn blur(infile: String, outfile: String) {
+fn blur(infile: String, outfile: String, blur_amount: f32) {
     // Here's how you open an existing image file
-    let img = image::open(infile).expect("Failed to open INFILE.");
+    let img = image::open(infile).expect("Failed to open input file.");
     // **OPTION**
     // Parse the blur amount (an f32) from the command-line and pass it through
     // to this function, instead of hard-coding it to 2.0.
-    let img2 = img.blur(2.0);
+    let img2 = img.blur(blur_amount);
     // Here's how you save an image to a file.
-    img2.save(outfile).expect("Failed writing OUTFILE.");
+    img2.save(outfile).expect("Failed writing to output file.");
 }
 
 fn brighten(infile: String, outfile: String) {
