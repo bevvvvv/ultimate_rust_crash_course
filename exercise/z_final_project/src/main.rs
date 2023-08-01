@@ -74,7 +74,35 @@ fn main() {
                                 .help("Brightness Level Integer")
                                 .takes_value(true)
                                 .required(true)
-                                .default_value("2"))).get_matches();
+                                .default_value("2")))
+                        .subcommand(SubCommand::with_name("crop")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("x_coord")
+                                .short("x")
+                                .help("Starting X Coordinate")
+                                .takes_value(true))
+                            .arg(Arg::with_name("y_coord")
+                                .short("y")
+                                .help("Starting Y Coordinate")
+                                .takes_value(true))
+                            .arg(Arg::with_name("width")
+                                .short("w")
+                                .help("Width of cropped image")
+                                .takes_value(true))
+                            .arg(Arg::with_name("height")
+                                .short("h")
+                                .help("Height of cropped image")
+                                .takes_value(true))).get_matches();
 
     match matches.subcommand() {
         ("blur", Some(blur_command)) => {
@@ -89,74 +117,20 @@ fn main() {
             let brightness_amount = brighten_command.value_of("brightness_amount").unwrap().parse().expect("Failed to parse brightness level");
             brighten(input, output, brightness_amount);
         },
+        ("crop", Some(crop_command)) => {
+            let input = crop_command.value_of("input").unwrap().to_string();
+            let output = crop_command.value_of("output").unwrap().to_string();
+            let x = crop_command.value_of("x_coord").unwrap().parse().expect("Failed to parse x coordinate");
+            let y = crop_command.value_of("y_coord").unwrap().parse().expect("Failed to parse y coordinate");
+            let width = crop_command.value_of("width").unwrap().parse().expect("Failed to parse width");
+            let height = crop_command.value_of("height").unwrap().parse().expect("Failed to parse height");
+            crop(input, output, x, y, width, height);
+        }
         _ => {
-            println!("Not a valid command");
+            println!("Could not parse command.");
         }
     }
-
-    // provided code to start parsing -> using clap instead
-    // let mut args: Vec<String> = std::env::args().skip(1).collect();
-    // if args.is_empty() {
-    //     print_usage_and_exit();
-    // }
-    // let subcommand = args.remove(0);
-    // match subcommand.as_str() {
-    //     // EXAMPLE FOR CONVERSION OPERATIONS
-    //     "blur" => {
-    //         if args.len() != 2 {
-    //             print_usage_and_exit();
-    //         }
-    //         let infile = args.remove(0);
-    //         let outfile = args.remove(0);
-    //         // **OPTION**
-    //         // Improve the blur implementation -- see the blur() function below
-    //         blur(infile, outfile);
-    //     }
-    //
-    //     // **OPTION**
-    //     // Brighten -- see the brighten() function below
-    //
-    //     // **OPTION**
-    //     // Crop -- see the crop() function below
-    //
-    //     // **OPTION**
-    //     // Rotate -- see the rotate() function below
-    //
-    //     // **OPTION**
-    //     // Invert -- see the invert() function below
-    //
-    //     // **OPTION**
-    //     // Grayscale -- see the grayscale() function below
-    //
-    //     // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
-    //     "fractal" => {
-    //         if args.len() != 1 {
-    //             print_usage_and_exit();
-    //         }
-    //         let outfile = args.remove(0);
-    //         fractal(outfile);
-    //     }
-    //
-    //     // **OPTION**
-    //     // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
-    //
-    //     // For everything else...
-    //     _ => {
-    //         print_usage_and_exit();
-    //     }
-    // }
 }
-
-// part of example parsing code (not using clap)
-// fn print_usage_and_exit() {
-//     println!("USAGE (when in doubt, use a .png extension on your filenames)");
-//     println!("blur INFILE OUTFILE");
-//     println!("fractal OUTFILE");
-//     // **OPTION**
-//     // Print useful information about what subcommands and arguments you can use
-//     // println!("...");
-//     std::process::exit(-1);
-// }
 
 fn blur(infile: String, outfile: String, blur_amount: f32) {
     // Here's how you open an existing image file
@@ -182,16 +156,19 @@ fn brighten(infile: String, outfile: String, brightness_amount: i32) {
     img2.save(outfile).expect("Failed writing to output file.");
 }
 
-fn crop(infile: String, outfile: String) {
+fn crop(infile: String, outfile: String, x: u32, y: u32, width: u32, height: u32) {
     // See blur() for an example of how to open an image.
+    let img = image::open(infile).expect("Failed to open input file.");
 
     // .crop() takes four arguments: x: u32, y: u32, width: u32, height: u32
     // You may hard-code them, if you like.  It returns a new image.
+    let img2 = img.crop_imm(x, y, width, height);
 
     // Challenge: parse the four values from the command-line and pass them
     // through to this function.
 
     // See blur() for an example of how to save the image.
+    img2.save(outfile).expect("Failed writing to output file.");
 }
 
 fn rotate(infile: String, outfile: String) {
