@@ -56,15 +56,44 @@ fn main() {
                                 .help("Blur amount")
                                 .takes_value(true)
                                 .required(true)
-                                .default_value("2.0"))).get_matches();
+                                .default_value("2.0")))
+                        .subcommand(SubCommand::with_name("brighten")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("brightness_amount")
+                                .long("level")
+                                .help("Brightness Level Integer")
+                                .takes_value(true)
+                                .required(true)
+                                .default_value("2"))).get_matches();
 
-    if let Some(blur_command) = matches.subcommand_matches("blur") {
-        // run blur
-        // Improve the blur implementation -- see the blur() function below
-        blur(blur_command.value_of("input").unwrap().to_string(),
-             blur_command.value_of("output").unwrap().to_string(),
-             blur_command.value_of("blur_amount").unwrap().parse().expect("Failed to parse a number"));
+    match matches.subcommand() {
+        ("blur", Some(blur_command)) => {
+            let input = blur_command.value_of("input").unwrap().to_string();
+            let output = blur_command.value_of("output").unwrap().to_string();
+            let blur_amount = blur_command.value_of("blur_amount").unwrap().parse().expect("Failed to parse blur amount");
+            blur(input, output, blur_amount);
+        },
+        ("brighten", Some(brighten_command)) => {
+            let input = brighten_command.value_of("input").unwrap().to_string();
+            let output = brighten_command.value_of("output").unwrap().to_string();
+            let brightness_amount = brighten_command.value_of("brightness_amount").unwrap().parse().expect("Failed to parse brightness level");
+            brighten(input, output, brightness_amount);
+        },
+        _ => {
+            println!("Not a valid command");
+        }
     }
+
     // provided code to start parsing -> using clap instead
     // let mut args: Vec<String> = std::env::args().skip(1).collect();
     // if args.is_empty() {
@@ -140,14 +169,17 @@ fn blur(infile: String, outfile: String, blur_amount: f32) {
     img2.save(outfile).expect("Failed writing to output file.");
 }
 
-fn brighten(infile: String, outfile: String) {
+fn brighten(infile: String, outfile: String, brightness_amount: i32) {
     // See blur() for an example of how to open / save an image.
+    let img = image::open(infile).expect("Failed to open input file.");
 
     // .brighten() takes one argument, an i32.  Positive numbers brighten the
     // image. Negative numbers darken it.  It returns a new image.
+    let img2 = img.brighten(brightness_amount);
 
     // Challenge: parse the brightness amount from the command-line and pass it
     // through to this function.
+    img2.save(outfile).expect("Failed writing to output file.");
 }
 
 fn crop(infile: String, outfile: String) {
