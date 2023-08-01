@@ -25,6 +25,9 @@
 //
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
+extern crate clap;
+use clap::{Arg, App, SubCommand};
+
 fn main() {
     // 1. First, you need to implement some basic command-line argument handling
     // so you can make your program do different things.  Here's a little bit
@@ -32,56 +35,79 @@ fn main() {
     //
     // Challenge: If you're feeling really ambitious, you could delete this code
     // and use the "clap" library instead: https://docs.rs/clap/2.32.0/clap/
-    let mut args: Vec<String> = std::env::args().skip(1).collect();
-    if args.is_empty() {
-        print_usage_and_exit();
+    let matches = App::new("Image Processing")
+                        .version("0.1")
+                        .author("Joseph S. <joe@sepich.dev>")
+                        .about("This application performs various image processing tasks")
+                        .subcommand(SubCommand::with_name("blur")
+                            .about("Blur an image")
+                            .arg(Arg::with_name("input")
+                                .short("i")
+                                .help("Input file")
+                                .takes_value(true)
+                                .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true))).get_matches();
+
+    if let Some(blur_command) = matches.subcommand_matches("blur") {
+        // run blur
+        // Improve the blur implementation -- see the blur() function below
+        blur(blur_command.value_of("input").unwrap().to_string(), blur_command.value_of("output").unwrap().to_string());
     }
-    let subcommand = args.remove(0);
-    match subcommand.as_str() {
-        // EXAMPLE FOR CONVERSION OPERATIONS
-        "blur" => {
-            if args.len() != 2 {
-                print_usage_and_exit();
-            }
-            let infile = args.remove(0);
-            let outfile = args.remove(0);
-            // **OPTION**
-            // Improve the blur implementation -- see the blur() function below
-            blur(infile, outfile);
-        }
-
-        // **OPTION**
-        // Brighten -- see the brighten() function below
-
-        // **OPTION**
-        // Crop -- see the crop() function below
-
-        // **OPTION**
-        // Rotate -- see the rotate() function below
-
-        // **OPTION**
-        // Invert -- see the invert() function below
-
-        // **OPTION**
-        // Grayscale -- see the grayscale() function below
-
-        // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
-        "fractal" => {
-            if args.len() != 1 {
-                print_usage_and_exit();
-            }
-            let outfile = args.remove(0);
-            fractal(outfile);
-        }
-
-        // **OPTION**
-        // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
-
-        // For everything else...
-        _ => {
-            print_usage_and_exit();
-        }
-    }
+    // provided code to start parsing -> using clap instead
+    // let mut args: Vec<String> = std::env::args().skip(1).collect();
+    // if args.is_empty() {
+    //     print_usage_and_exit();
+    // }
+    // let subcommand = args.remove(0);
+    // match subcommand.as_str() {
+    //     // EXAMPLE FOR CONVERSION OPERATIONS
+    //     "blur" => {
+    //         if args.len() != 2 {
+    //             print_usage_and_exit();
+    //         }
+    //         let infile = args.remove(0);
+    //         let outfile = args.remove(0);
+    //         // **OPTION**
+    //         // Improve the blur implementation -- see the blur() function below
+    //         blur(infile, outfile);
+    //     }
+    //
+    //     // **OPTION**
+    //     // Brighten -- see the brighten() function below
+    //
+    //     // **OPTION**
+    //     // Crop -- see the crop() function below
+    //
+    //     // **OPTION**
+    //     // Rotate -- see the rotate() function below
+    //
+    //     // **OPTION**
+    //     // Invert -- see the invert() function below
+    //
+    //     // **OPTION**
+    //     // Grayscale -- see the grayscale() function below
+    //
+    //     // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
+    //     "fractal" => {
+    //         if args.len() != 1 {
+    //             print_usage_and_exit();
+    //         }
+    //         let outfile = args.remove(0);
+    //         fractal(outfile);
+    //     }
+    //
+    //     // **OPTION**
+    //     // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
+    //
+    //     // For everything else...
+    //     _ => {
+    //         print_usage_and_exit();
+    //     }
+    // }
 }
 
 fn print_usage_and_exit() {
