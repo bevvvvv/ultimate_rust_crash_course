@@ -58,7 +58,7 @@ fn main() {
                                 .required(true)
                                 .default_value("2.0")))
                         .subcommand(SubCommand::with_name("brighten")
-                            .about("Blur an image")
+                            .about("Change the brightness of an image")
                             .arg(Arg::with_name("input")
                                 .short("i")
                                 .help("Input file")
@@ -76,7 +76,7 @@ fn main() {
                                 .required(true)
                                 .default_value("2")))
                         .subcommand(SubCommand::with_name("crop")
-                            .about("Blur an image")
+                            .about("Crop an image")
                             .arg(Arg::with_name("input")
                                 .short("i")
                                 .help("Input file")
@@ -104,7 +104,7 @@ fn main() {
                                 .help("Height of cropped image")
                                 .takes_value(true)))
                         .subcommand(SubCommand::with_name("rotate")
-                            .about("Blur an image")
+                            .about("Rotate an image in 90 degree increments")
                             .arg(Arg::with_name("input")
                                 .short("i")
                                 .help("Input file")
@@ -120,7 +120,7 @@ fn main() {
                                 .help("Rotation Angle in degrees interval of 90")
                                 .takes_value(true)))
                         .subcommand(SubCommand::with_name("invert")
-                            .about("Blur an image")
+                            .about("Invert the colors of an image")
                             .arg(Arg::with_name("input")
                                 .short("i")
                                 .help("Input file")
@@ -132,12 +132,26 @@ fn main() {
                                 .takes_value(true)
                                 .required(true)))
                         .subcommand(SubCommand::with_name("grayscale")
-                            .about("Blur an image")
+                            .about("Convert image to grayscale")
                             .arg(Arg::with_name("input")
                                 .short("i")
                                 .help("Input file")
                                 .takes_value(true)
                                 .required(true))
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true)))
+                        .subcommand(SubCommand::with_name("generate")
+                            .about("Generate an image")
+                            .arg(Arg::with_name("output")
+                                .short("o")
+                                .help("Output file")
+                                .takes_value(true)
+                                .required(true)))
+                        .subcommand(SubCommand::with_name("fractal")
+                            .about("Generate a fractal")
                             .arg(Arg::with_name("output")
                                 .short("o")
                                 .help("Output file")
@@ -181,6 +195,14 @@ fn main() {
             let input = grayscale_command.value_of("input").unwrap().to_string();
             let output = grayscale_command.value_of("output").unwrap().to_string();
             grayscale(input, output);
+        },
+        ("generate", Some(generate_command)) => {
+            let output = generate_command.value_of("output").unwrap().to_string();
+            generate(output);
+        },
+        ("fractal", Some(fractal_command)) => {
+            let output = fractal_command.value_of("output").unwrap().to_string();
+            fractal(output);
         }
         _ => {
             println!("Could not parse command.");
@@ -276,10 +298,17 @@ fn grayscale(infile: String, outfile: String) {
 
 fn generate(outfile: String) {
     // Create an ImageBuffer -- see fractal() for an example
+    let mut imgbuffer = image::ImageBuffer::new(800, 800);
 
     // Iterate over the coordinates and pixels of the image -- see fractal() for an example
-
     // Set the image to some solid color. -- see fractal() for an example
+    for (x, y, pixel) in imgbuffer.enumerate_pixels_mut() {
+        let red: u8 = 234;
+        let blue: u8 = 150;
+        let green: u8 = 0;
+
+        *pixel = image::Rgb([red, green, blue]);
+    }
 
     // Challenge: parse some color data from the command-line, pass it through
     // to this function to use for the solid color.
@@ -287,6 +316,7 @@ fn generate(outfile: String) {
     // Challenge 2: Generate something more interesting!
 
     // See blur() for an example of how to save the image
+    imgbuffer.save(outfile).unwrap();
 }
 
 // This code was adapted from https://github.com/PistonDevelopers/image
