@@ -8,6 +8,7 @@ use rusty_audio::Audio;
 use space_invaders::render;
 use space_invaders::frame::{Drawable, new_frame};
 use space_invaders::player::Player;
+use space_invaders::invaders::Army;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Audio Setup
@@ -47,6 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Game Loop
     let mut player = Player::new();
     let mut instant = Instant::now();
+    let mut army = Army::new();
     'gameloop: loop {
         // Init
         let mut curr_frame = new_frame();
@@ -75,9 +77,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Updates
         player.update(delta);
+        if army.update(delta) {
+            audio.play("move");
+        };
 
         // Draw and Render
-        player.draw(&mut curr_frame);
+        let drawables : Vec<&dyn Drawable> = vec![&player, &army];
+        for drawable in drawables {
+            drawable.draw(&mut curr_frame);
+        }
         let _ = render_transmitter.send(curr_frame); // ignores any errors
         thread::sleep(Duration::from_millis(10));
     }
