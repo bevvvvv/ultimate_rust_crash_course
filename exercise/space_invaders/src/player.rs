@@ -2,6 +2,7 @@ use std::time::Duration;
 use crate::{NUM_COLS, NUM_ROWS};
 use crate::frame::{Drawable, Frame};
 use crate::shot::Shot;
+use crate::invaders::Army;
 
 pub struct Player {
     x: usize,
@@ -36,6 +37,18 @@ impl Player {
             shot.update(delta);
         }
         self.shots.retain(|shot| !shot.dead());
+    }
+    pub fn detect_collision(&mut self, army: &mut Army) -> bool {
+        let mut kaboom = false;
+        for shot in self.shots.iter_mut() {
+            if !shot.exploding {
+                if army.kill_invader_at(shot.x, shot.y) {
+                    kaboom = true;
+                    shot.explode();
+                }
+            }
+        }
+        kaboom
     }
 }
 

@@ -80,6 +80,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         if army.update(delta) {
             audio.play("move");
         };
+        if player.detect_collision(&mut army) {
+            audio.play("explode");
+        }
 
         // Draw and Render
         let drawables : Vec<&dyn Drawable> = vec![&player, &army];
@@ -88,6 +91,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         let _ = render_transmitter.send(curr_frame); // ignores any errors
         thread::sleep(Duration::from_millis(10));
+
+        // Detect Game Outcome
+        if army.all_killed() {
+            audio.play("win");
+            break 'gameloop;
+        } else if army.reached_bottom() {
+            audio.play("lose");
+            break 'gameloop;
+        }
     }
 
     // Cleanup
