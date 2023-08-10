@@ -6,7 +6,8 @@ use crossterm::cursor::{Hide, Show};
 use crossterm::event::{KeyCode, Event};
 use rusty_audio::Audio;
 use space_invaders::render;
-use space_invaders::frame::new_frame;
+use space_invaders::frame::{Drawable, new_frame};
+use space_invaders::player::Player;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Audio Setup
@@ -44,14 +45,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     });
 
     // Game Loop
+    let mut player = Player::new();
     'gameloop: loop {
         // Init
-        let curr_frame = new_frame();
+        let mut curr_frame = new_frame();
 
         // Input
         while event::poll(Duration::default())? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
+                    KeyCode::Left => player.move_left(),
+                    KeyCode::Right => player.move_right(),
                     KeyCode::Esc | KeyCode::Char('q') => {
                         audio.play("lose");
                         break 'gameloop;
@@ -62,6 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // Draw and Render
+        player.draw(&mut curr_frame);
         let _ = render_transmitter.send(curr_frame); // ignores any errors
         thread::sleep(Duration::from_millis(10));
     }
